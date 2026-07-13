@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Record Collection Catalog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f0eb;
+            color: #2d2d2d;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        header .stats div {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 25px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        header .stats .number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0d6ce;
+            border-radius: 8px;
+            font-size: 1rem;
+            min-width: 200px;
+        }
+        
+        .search-bar input:focus {
+            outline: none;
+            border-color: #0f3460;
+        }
+        
+        .search-bar select {
+            padding: 12px 20px;
+            border: 2px solid #e0d6ce;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            min-width: 150px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        
+        .record-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        
+        .record-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .record-card .image {
+            width: 100%;
+            height: 280px;
+            background: #f0ebe6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .record-card .image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .record-card .image .no-image {
+            font-size: 4rem;
+            color: #ccc;
+        }
+        
+        .record-card .info {
+            padding: 16px 20px;
+        }
+        
+        .record-card .artist {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        
+        .record-card .title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1a1a2e;
+        }
+        
+        .record-card .details {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 8px;
+        }
+        
+        .record-card .bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #f0ebe6;
+        }
+        
+        .record-card .price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #0f3460;
+        }
+        
+        .record-card .condition {
+            font-size: 0.8rem;
+            background: #f0ebe6;
+            padding: 3px 10px;
+            border-radius: 12px;
+            color: #555;
+        }
+        
+        .record-card .condition.M { background: #d4edda; color: #155724; }
+        .record-card .condition.NM { background: #d4edda; color: #155724; }
+        .record-card .condition.VG { background: #fff3cd; color: #856404; }
+        .record-card .condition.G { background: #f8d7da; color: #721c24; }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 1.2rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            max-width: 600px;
+            width: 100%;
+            border-radius: 16px;
+            padding: 30px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            background: none;
+            border: none;
+        }
+        
+        .modal-close:hover {
+            color: #333;
+        }
+        
+        .modal .modal-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .modal .modal-artist {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .modal .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 5px 0 10px;
+        }
+        
+        .modal .modal-details {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .modal .modal-price {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #0f3460;
+            margin: 10px 0;
+        }
+        
+        .modal .pickup-info {
+            background: #e8f0fe;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            color: #0f3460;
+        }
+        
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            header .stats { gap: 15px; }
+            header .stats div { padding: 8px 15px; }
+            .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+            .record-card .image { height: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 Record Collection</h1>
+            <p style="opacity:0.8;">Local Pickup Only • Payment Handled In Person</p>
+            <div class="stats">
+                <div>
+                    <div class="number">41</div>
+                    <div>Records</div>
+                </div>
+                <div>
+                    <div class="number">$320.88</div>
+                    <div>Total Value</div>
+                </div>
+                <div>
+                    <div class="number">7</div>
+                    <div>Mint/Near Mint</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="search-section">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="🔍 Search by artist, album, or label..." onkeyup="filterRecords()">
+                <select id="sortSelect" onchange="filterRecords()">
+                    <option value="artist">Sort by Artist</option>
+                    <option value="year">Sort by Year</option>
+                    <option value="price">Sort by Price</option>
+                    <option value="condition">Sort by Condition</option>
+                </select>
+                <select id="conditionFilter" onchange="filterRecords()">
+                    <option value="all">All Conditions</option>
+                    <option value="M">Mint (M)</option>
+                    <option value="NM">Near Mint (NM)</option>
+                    <option value="VG+">Very Good Plus (VG+)</option>
+                    <option value="VG">Very Good (VG)</option>
+                    <option value="G">Good (G)</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="grid" id="recordGrid">
+
+            <div class="record-card" data-artist="Barbra Streisand" data-title="My Name Is Barbra, Two..." data-year="1965" data-condition="VG" data-price="3.0" onclick="openModal(19)">
+                <div class="image">
+                    <img src="https://i.discogs.com/Tm9n3ct5KEzSKtzU6P5ahDhQsW9sQKdXGIEO6cX5TMI/rs:fit/g:sm/q:90/h:600/w:593/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE1MTY2/MDUtMTM0ODg1MTIx/Mi01MzY3LmpwZWc.jpeg" alt="My Name Is Barbra, Two...">
+                </div>
+                <div class="info">
+                    <div class="artist">Barbra Streisand</div>
+                    <div class="title">My Name Is Barbra, Two...</div>
+                    <div class="details">1965 • Columbia Records</div>
+                    <div class="bottom">
+                        <span class="price">$3.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Bill Monroe" data-title="The Original Bluegrass Band" data-year="1978" data-condition="VG+" data-price="8.0" onclick="openModal(1)">
+                <div class="image">
+                    <img src="https://i.discogs.com/vPDtHJYeXXzRqbrHAudHIY8Aun3oJfcJz3F-WTYY0q4/rs:fit/g:sm/q:90/h:600/w:594/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTM0MTk1/MzItMTQ1NTA2OTM3/Ny01MTg1LmpwZWc.jpeg" alt="The Original Bluegrass Band">
+                </div>
+                <div class="info">
+                    <div class="artist">Bill Monroe</div>
+                    <div class="title">The Original Bluegrass Band</div>
+                    <div class="details">1978 • Rounder Records</div>
+                    <div class="bottom">
+                        <span class="price">$8.00</span>
+                        <span class="condition VG">VG+</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Bob Newhart" data-title="The Button-Down Mind of Bob Newhart" data-year="1960" data-condition="VG" data-price="5.0" onclick="openModal(22)">
+                <div class="image">
+                    <img src="https://i.discogs.com/liclKgOjJHHMVV04UqijR09wYMPfXpuNQMDfar-Fe-0/rs:fit/g:sm/q:90/h:589/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTEzNDMz/NDEtMTU2MDYwNTM3/NS04ODU4LmpwZWc.jpeg" alt="The Button-Down Mind of Bob Newhart">
+                </div>
+                <div class="info">
+                    <div class="artist">Bob Newhart</div>
+                    <div class="title">The Button-Down Mind of Bob Newhart</div>
+                    <div class="details">1960 • Warner Bros. Records</div>
+                    <div class="bottom">
+                        <span class="price">$5.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Bobbie Gentry & Glen Campbell" data-title="Bobbie Gentry and Glen Campbell" data-year="1968" data-condition="VG" data-price="5.0" onclick="openModal(36)">
+                <div class="image">
+                    <img src="https://i.discogs.com/ArTsa3iynitEx9qN6UJ7CMMuEuD2Um7Jy-lYZv-QVnk/rs:fit/g:sm/q:90/h:597/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTIzNDU3/MzYtMTI4MzcxMDAy/Ni5qcGVn.jpeg" alt="Bobbie Gentry and Glen Campbell">
+                </div>
+                <div class="info">
+                    <div class="artist">Bobbie Gentry & Glen Campbell</div>
+                    <div class="title">Bobbie Gentry and Glen Campbell</div>
+                    <div class="details">1968 • Capitol Records</div>
+                    <div class="bottom">
+                        <span class="price">$5.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Charlie Rich" data-title="Charlie Rich Sings Country & Western" data-year="1967" data-condition="VG" data-price="8.63" onclick="openModal(9)">
+                <div class="image">
+                    <img src="https://i.discogs.com/qJtV0dMOT53cK10qWA-MRLeFV7HDc4SN_hIz1NYvLO0/rs:fit/g:sm/q:90/h:600/w:592/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTM5ODYz/ODEtMTU0MDEzNjE4/MC01NzgyLmpwZWc.jpeg" alt="Charlie Rich Sings Country & Western">
+                </div>
+                <div class="info">
+                    <div class="artist">Charlie Rich</div>
+                    <div class="title">Charlie Rich Sings Country & Western</div>
+                    <div class="details">1967 • Hi Records</div>
+                    <div class="bottom">
+                        <span class="price">$8.63</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Chuck Mangione" data-title="Chase The Clouds Away" data-year="1975" data-condition="VG" data-price="2.5" onclick="openModal(20)">
+                <div class="image">
+                    <img src="https://i.discogs.com/wq3M4-wJw_SQQ9B4XHoifRvm0mX2IVJMdF0O0fEQplo/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTYzNjM2/NS0xMTk3MDUwNTQ2/LmpwZWc.jpeg" alt="Chase The Clouds Away">
+                </div>
+                <div class="info">
+                    <div class="artist">Chuck Mangione</div>
+                    <div class="title">Chase The Clouds Away</div>
+                    <div class="details">1975 • A&M Records</div>
+                    <div class="bottom">
+                        <span class="price">$2.50</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Conway Twitty" data-title="Conway Twitty's Greatest Hits..." data-year="1960" data-condition="VG" data-price="6.0" onclick="openModal(40)">
+                <div class="image">
+                    <img src="https://i.discogs.com/UroLoR9WM_rQUzxNfUf4SThqhRrZnKWKFjhzXKA88DE/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTEyNDE0/OTkxLTE1MzQ4MjU2/NjMtOTU0My5qcGVn.jpeg" alt="Conway Twitty's Greatest Hits...">
+                </div>
+                <div class="info">
+                    <div class="artist">Conway Twitty</div>
+                    <div class="title">Conway Twitty's Greatest Hits...</div>
+                    <div class="details">1960 • MGM Records</div>
+                    <div class="bottom">
+                        <span class="price">$6.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Dion" data-title="Runaround Sue" data-year="1961" data-condition="VG+" data-price="24.99" onclick="openModal(5)">
+                <div class="image">
+                    <img src="https://i.discogs.com/mVZZyZtPEUxtgimXpnGOhgB2hU1UZJlrCgC6aRCFzrc/rs:fit/g:sm/q:90/h:528/w:528/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTUzOTAw/NS0xMzQ2Nzk0OTIx/LTY2NzkuanBlZw.jpeg" alt="Runaround Sue">
+                </div>
+                <div class="info">
+                    <div class="artist">Dion</div>
+                    <div class="title">Runaround Sue</div>
+                    <div class="details">1961 • Laurie Records</div>
+                    <div class="bottom">
+                        <span class="price">$24.99</span>
+                        <span class="condition VG">VG+</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Father Guido Sarducci (Don Novello)" data-title="Live At St. Douglas Convent" data-year="1980" data-condition="VG" data-price="3.0" onclick="openModal(34)">
+                <div class="image">
+                    <img src="https://i.discogs.com/wVd6Tc16OFwsW3yzIBWPg4doTsBPH5PQK4HBX-dW4E0/rs:fit/g:sm/q:90/h:600/w:584/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE5ODE2/MDctMTM0MDgxNjcz/Mi04MzYwLmpwZWc.jpeg" alt="Live At St. Douglas Convent">
+                </div>
+                <div class="info">
+                    <div class="artist">Father Guido Sarducci (Don Novello)</div>
+                    <div class="title">Live At St. Douglas Convent</div>
+                    <div class="details">1980 • Warner Bros. Records</div>
+                    <div class="bottom">
+                        <span class="price">$3.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Glen Campbell" data-title="Galveston" data-year="1969" data-condition="VG" data-price="6.0" onclick="openModal(35)">
+                <div class="image">
+                    <img src="https://i.discogs.com/ZVqSe7WQG9GMcVavxHX2deLECl8GhFLRbF9S72s4ow8/rs:fit/g:sm/q:90/h:600/w:596/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTk3NDY4/MjItMTQ4NTcyNDk3/NC05NDExLmpwZWc.jpeg" alt="Galveston">
+                </div>
+                <div class="info">
+                    <div class="artist">Glen Campbell</div>
+                    <div class="title">Galveston</div>
+                    <div class="details">1969 • Capitol Records</div>
+                    <div class="bottom">
+                        <span class="price">$6.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Gordon Lightfoot" data-title="The Way I Feel" data-year="1967" data-condition="VG" data-price="8.0" onclick="openModal(39)">
+                <div class="image">
+                    <img src="https://i.discogs.com/NwQKOJiUK9snj7OnYTXs49CXPfUcTYwoiEKSkRD2Do8/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTIyNDU0/MDItMTMzMDI1MjQ0/MC5qcGVn.jpeg" alt="The Way I Feel">
+                </div>
+                <div class="info">
+                    <div class="artist">Gordon Lightfoot</div>
+                    <div class="title">The Way I Feel</div>
+                    <div class="details">1967 • United Artists Records</div>
+                    <div class="bottom">
+                        <span class="price">$8.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Hank Snow" data-title="My Nova Scotia Home" data-year="1967" data-condition="VG" data-price="4.35" onclick="openModal(8)">
+                <div class="image">
+                    <img src="https://i.discogs.com/36mVsfcw6IEKT7DmqOtNjbfvq_ignikvA59CgayhJho/rs:fit/g:sm/q:90/h:598/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQ0MDgy/OTUtMTQ3NjM4Mjg1/Mi04MTkzLmpwZWc.jpeg" alt="My Nova Scotia Home">
+                </div>
+                <div class="info">
+                    <div class="artist">Hank Snow</div>
+                    <div class="title">My Nova Scotia Home</div>
+                    <div class="details">1967 • RCA Camden</div>
+                    <div class="bottom">
+                        <span class="price">$4.35</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Jack Scott" data-title="What In The World's Come Over You" data-year="1960" data-condition="VG" data-price="19.41" onclick="openModal(18)">
+                <div class="image">
+                    <img src="https://i.discogs.com/F3W3gqWrEi72BdmlhJt1F6fyK3D7lpFsqk5MjsHmLF8/rs:fit/g:sm/q:90/h:596/w:599/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTEzNjQy/OTQtMTI2NzExNDU0/OS5qcGVn.jpeg" alt="What In The World's Come Over You">
+                </div>
+                <div class="info">
+                    <div class="artist">Jack Scott</div>
+                    <div class="title">What In The World's Come Over You</div>
+                    <div class="details">1960 • Top Rank International</div>
+                    <div class="bottom">
+                        <span class="price">$19.41</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Joe Stampley" data-title="Biggest Hits" data-year="1982" data-condition="VG" data-price="4.0" onclick="openModal(38)">
+                <div class="image">
+                    <img src="https://i.discogs.com/fJXpKznFuLoL7L-w2ZUpAbNIJ4NvSjFllx1-eqboNOE/rs:fit/g:sm/q:90/h:592/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQ5OTg5/NTMtMTQ3NTEyMDgx/Mi03Njk4LmpwZWc.jpeg" alt="Biggest Hits">
+                </div>
+                <div class="info">
+                    <div class="artist">Joe Stampley</div>
+                    <div class="title">Biggest Hits</div>
+                    <div class="details">1982 • Epic Records</div>
+                    <div class="bottom">
+                        <span class="price">$4.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Ken Griffin" data-title="Hawaiian Magic" data-year="1957" data-condition="VG" data-price="4.5" onclick="openModal(32)">
+                <div class="image">
+                    <img src="https://i.discogs.com/p0szeNC00OuOEETVD2zQCWgjhTvBzv-ffwI2V_9UTwE/rs:fit/g:sm/q:90/h:594/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTc0NTAx/MDgtMTUyMDk4MTM0/MS03NzIxLmpwZWc.jpeg" alt="Hawaiian Magic">
+                </div>
+                <div class="info">
+                    <div class="artist">Ken Griffin</div>
+                    <div class="title">Hawaiian Magic</div>
+                    <div class="details">1957 • Columbia Records</div>
+                    <div class="bottom">
+                        <span class="price">$4.50</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Mac Davis" data-title="Baby Don't Get Hooked On Me" data-year="1972" data-condition="VG" data-price="2.0" onclick="openModal(2)">
+                <div class="image">
+                    <img src="https://i.discogs.com/iYcBC7jSpiDmJzGhJEkpt82OXIGiR8si03_AtUx01J4/rs:fit/g:sm/q:90/h:600/w:596/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE3NjAz/MjAtMTQ3MjgzMDgw/OS01NDc1LmpwZWc.jpeg" alt="Baby Don't Get Hooked On Me">
+                </div>
+                <div class="info">
+                    <div class="artist">Mac Davis</div>
+                    <div class="title">Baby Don't Get Hooked On Me</div>
+                    <div class="details">1972 • Columbia Records</div>
+                    <div class="bottom">
+                        <span class="price">$2.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Martin Denny" data-title="Quiet Village - The Exotic Sounds Of Martin Denny" data-year="1959" data-condition="VG+" data-price="14.0" onclick="openModal(28)">
+                <div class="image">
+                    <img src="https://i.discogs.com/aTa2FLZcPZMuptCCaT6-ocyuNSXlkqyn0sjPLCp6iPY/rs:fit/g:sm/q:90/h:592/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTM5OTQy/NS0xMjkwMzc2MzQx/LmpwZWc.jpeg" alt="Quiet Village - The Exotic Sounds Of Martin Denny">
+                </div>
+                <div class="info">
+                    <div class="artist">Martin Denny</div>
+                    <div class="title">Quiet Village - The Exotic Sounds Of Martin Denny</div>
+                    <div class="details">1959 • Liberty Records</div>
+                    <div class="bottom">
+                        <span class="price">$14.00</span>
+                        <span class="condition VG">VG+</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Marty Robbins" data-title="Marty's Greatest Hits" data-year="1959" data-condition="VG" data-price="6.0" onclick="openModal(26)">
+                <div class="image">
+                    <img src="https://i.discogs.com/Fs43w_P-YbLsJSXXyq2kxkKpvs6Q07TfQOgzV5lnKfQ/rs:fit/g:sm/q:90/h:600/w:593/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI4MzM5/ODktMTMwOTAwODAx/NC5qcGVn.jpeg" alt="Marty's Greatest Hits">
+                </div>
+                <div class="info">
+                    <div class="artist">Marty Robbins</div>
+                    <div class="title">Marty's Greatest Hits</div>
+                    <div class="details">1959 • Columbia Records</div>
+                    <div class="bottom">
+                        <span class="price">$6.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Mitch Miller and The Gang" data-title="Sing Along With Mitch" data-year="1958" data-condition="VG" data-price="4.5" onclick="openModal(25)">
+                <div class="image">
+                    <img src="https://i.discogs.com/23J7wza1WEe05k3bsX77hS3IxJ69jOhbwkRYR4q5gxQ/rs:fit/g:sm/q:90/h:600/w:588/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTIwMzg2/MTItMTI2MDEyNzM0/NS5qcGVn.jpeg" alt="Sing Along With Mitch">
+                </div>
+                <div class="info">
+                    <div class="artist">Mitch Miller and The Gang</div>
+                    <div class="title">Sing Along With Mitch</div>
+                    <div class="details">1958 • Columbia Records</div>
+                    <div class="bottom">
+                        <span class="price">$4.50</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Nana Mouskouri" data-title="Nana Mouskouri Sings Over & Over" data-year="1969" data-condition="VG" data-price="6.0" onclick="openModal(23)">
+                <div class="image">
+                    <img src="https://i.discogs.com/KPqgVWjbXtXvwN0C13LIrT_iq4ERAK74q3LeweJHHpg/rs:fit/g:sm/q:90/h:475/w:513/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQ1NDg1/NDAtMTM2ODAzOTcw/MS0xNzUwLmpwZWc.jpeg" alt="Nana Mouskouri Sings Over & Over">
+                </div>
+                <div class="info">
+                    <div class="artist">Nana Mouskouri</div>
+                    <div class="title">Nana Mouskouri Sings Over & Over</div>
+                    <div class="details">1969 • Fontana Records</div>
+                    <div class="bottom">
+                        <span class="price">$6.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Nana Mouskouri" data-title="A Paris (Enregistrement Public A L'Olympia)" data-year="1979" data-condition="VG" data-price="15.0" onclick="openModal(24)">
+                <div class="image">
+                    <img src="https://i.discogs.com/rF9mapFRx_LPsik9MIj94xj2F6qIr96c837JER9azMw/rs:fit/g:sm/q:90/h:600/w:578/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTUxMDAz/MzAtMTUwOTU5NzAz/MC05MTk5LmpwZWc.jpeg" alt="A Paris (Enregistrement Public A L'Olympia)">
+                </div>
+                <div class="info">
+                    <div class="artist">Nana Mouskouri</div>
+                    <div class="title">A Paris (Enregistrement Public A L'Olympia)</div>
+                    <div class="details">1979 • Cachet Records</div>
+                    <div class="bottom">
+                        <span class="price">$15.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Nana Mouskouri" data-title="Roses & Sunshine" data-year="1979" data-condition="VG" data-price="5.0" onclick="openModal(27)">
+                <div class="image">
+                    <img src="https://i.discogs.com/eF4HhpnsGUmvGCjQQaaw6bMrDO5TSdi4GbLkaxrhBDA/rs:fit/g:sm/q:90/h:600/w:598/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQwODU5/NzItMTUwOTY1Mzc2/NC00MjY0LmpwZWc.jpeg" alt="Roses & Sunshine">
+                </div>
+                <div class="info">
+                    <div class="artist">Nana Mouskouri</div>
+                    <div class="title">Roses & Sunshine</div>
+                    <div class="details">1979 • Cachet Records</div>
+                    <div class="bottom">
+                        <span class="price">$5.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Pat Boone" data-title="This And That" data-year="1960" data-condition="VG" data-price="5.0" onclick="openModal(30)">
+                <div class="image">
+                    <img src="https://i.discogs.com/AM0e1To5DIwCYUYYiyes-b4cFLOq3xREnZYYcw4JSVc/rs:fit/g:sm/q:90/h:600/w:597/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQyMDgz/ODMtMTYwNTE5MzU5/My01NDEwLmpwZWc.jpeg" alt="This And That">
+                </div>
+                <div class="info">
+                    <div class="artist">Pat Boone</div>
+                    <div class="title">This And That</div>
+                    <div class="details">1960 • Dot Records</div>
+                    <div class="bottom">
+                        <span class="price">$5.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Paul Anka" data-title="Paul Anka Sings His Big Big Big 15 Vol. 3" data-year="1962" data-condition="VG" data-price="10.0" onclick="openModal(29)">
+                <div class="image">
+                    <img src="https://i.discogs.com/bfAt21aIpDb_2iDjzUYh0rnusH-XILhn30ym0VeNJZ8/rs:fit/g:sm/q:90/h:300/w:296/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTMyMzM3/MjItMTMyMTYyODM2/NS5qcGVn.jpeg" alt="Paul Anka Sings His Big Big Big 15 Vol. 3">
+                </div>
+                <div class="info">
+                    <div class="artist">Paul Anka</div>
+                    <div class="title">Paul Anka Sings His Big Big Big 15 Vol. 3</div>
+                    <div class="details">1962 • Sparton / ABC-Paramount</div>
+                    <div class="bottom">
+                        <span class="price">$10.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Pierre Moreau And His Orchestra" data-title="Love Is Blue (L'Amour Est Bleu)" data-year="1968" data-condition="VG" data-price="4.0" onclick="openModal(11)">
+                <div class="image">
+                    <img src="https://i.discogs.com/jkJdweOU5uqkDnSCqtuapcuEL_kKKJIQeyQS7gtPpKc/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTg1OTU3/MzYtMTQ2NDc2NjQ2/NS04MzU0LmpwZWc.jpeg" alt="Love Is Blue (L'Amour Est Bleu)">
+                </div>
+                <div class="info">
+                    <div class="artist">Pierre Moreau And His Orchestra</div>
+                    <div class="title">Love Is Blue (L'Amour Est Bleu)</div>
+                    <div class="details">1968 • Custom Records</div>
+                    <div class="bottom">
+                        <span class="price">$4.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Ricky Van Shelton" data-title="Loving Proof" data-year="1988" data-condition="VG+" data-price="10.0" onclick="openModal(37)">
+                <div class="image">
+                    <img src="https://i.discogs.com/lyAzY6BTW9o0ZCZE7qIdKfnP5nL4BGCmgx7lnP4zddE/rs:fit/g:sm/q:90/h:592/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTMyNDE5/NDctMTM2NjU5MDU4/MC0zNDQ2LmpwZWc.jpeg" alt="Loving Proof">
+                </div>
+                <div class="info">
+                    <div class="artist">Ricky Van Shelton</div>
+                    <div class="title">Loving Proof</div>
+                    <div class="details">1988 • Columbia Records</div>
+                    <div class="bottom">
+                        <span class="price">$10.00</span>
+                        <span class="condition VG">VG+</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Ronnie Hawkins" data-title="Ronnie Hawkins" data-year="1959" data-condition="VG" data-price="30.0" onclick="openModal(6)">
+                <div class="image">
+                    <img src="https://i.discogs.com/Zd_hBLuYNO6BGpl3rsqj5ZLuhoVD9cutPSJGKqorBb4/rs:fit/g:sm/q:90/h:493/w:500/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTM3MjI5/MTMtMTM0MTc3NzI3/NS0yMzA4LmpwZWc.jpeg" alt="Ronnie Hawkins">
+                </div>
+                <div class="info">
+                    <div class="artist">Ronnie Hawkins</div>
+                    <div class="title">Ronnie Hawkins</div>
+                    <div class="details">1959 • Roulette Records</div>
+                    <div class="bottom">
+                        <span class="price">$30.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Sammy Davis Jr." data-title="Forget-Me-Nots For First Nighters" data-year="1963" data-condition="VG" data-price="8.0" onclick="openModal(10)">
+                <div class="image">
+                    <img src="https://i.discogs.com/l_wCWoPnHz_isQPPyNIKsFmGNjk07aTc9UAMCKKWR1c/rs:fit/g:sm/q:90/h:225/w:224/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTU4NDc2/MTUtMTQwNDM1NDg4/Ny04Mzc0LmpwZWc.jpeg" alt="Forget-Me-Nots For First Nighters">
+                </div>
+                <div class="info">
+                    <div class="artist">Sammy Davis Jr.</div>
+                    <div class="title">Forget-Me-Nots For First Nighters</div>
+                    <div class="details">1963 • Decca Records</div>
+                    <div class="bottom">
+                        <span class="price">$8.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Shelley Berman" data-title="Inside Shelley Berman" data-year="1959" data-condition="VG" data-price="5.0" onclick="openModal(33)">
+                <div class="image">
+                    <img src="https://i.discogs.com/EAvdBMa5HtJeydxWDVDuw8FCyowUxCD74tC6gX7rr4k/rs:fit/g:sm/q:90/h:599/w:592/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTUwMTEx/NTgtMTM4NTY0MDcx/MC05NDcyLmpwZWc.jpeg" alt="Inside Shelley Berman">
+                </div>
+                <div class="info">
+                    <div class="artist">Shelley Berman</div>
+                    <div class="title">Inside Shelley Berman</div>
+                    <div class="details">1959 • Verve Records</div>
+                    <div class="bottom">
+                        <span class="price">$5.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="The Bells" data-title="Stay Awhile" data-year="1971" data-condition="VG" data-price="5.0" onclick="openModal(12)">
+                <div class="image">
+                    <img src="https://i.discogs.com/sq2dCJ7a_3eMCgPLbNQqFekc97Cbsz3lm6zmYOOIfKk/rs:fit/g:sm/q:90/h:600/w:592/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE1Mzg2/ODUtMTM3MzgxMDYy/My0yMjE3LmpwZWc.jpeg" alt="Stay Awhile">
+                </div>
+                <div class="info">
+                    <div class="artist">The Bells</div>
+                    <div class="title">Stay Awhile</div>
+                    <div class="details">1971 • Polydor Records</div>
+                    <div class="bottom">
+                        <span class="price">$5.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="The Everly Brothers" data-title="The Everly Brothers' Best" data-year="1959" data-condition="VG+" data-price="15.0" onclick="openModal(21)">
+                <div class="image">
+                    <img src="https://i.discogs.com/5Z3AFC7co1ZAMh1TV0oEtvbHtvwznp4OlGU4EuLXv4s/rs:fit/g:sm/q:90/h:499/w:500/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE3NDk1/NDItMTI5OTU0ODM2/OC5qcGVn.jpeg" alt="The Everly Brothers' Best">
+                </div>
+                <div class="info">
+                    <div class="artist">The Everly Brothers</div>
+                    <div class="title">The Everly Brothers' Best</div>
+                    <div class="details">1959 • Cadence Records</div>
+                    <div class="bottom">
+                        <span class="price">$15.00</span>
+                        <span class="condition VG">VG+</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="The Everly Brothers" data-title="EB 84" data-year="1984" data-condition="VG" data-price="8.0" onclick="openModal(31)">
+                <div class="image">
+                    <img src="https://i.discogs.com/ewJbFEa0b2gLnSeYAdr__0oX3WDt-XysgXaVjbm1Z3Y/rs:fit/g:sm/q:90/h:492/w:500/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTExMjQ1/NTItMTIyNDYwMDgw/OC5qcGVn.jpeg" alt="EB 84">
+                </div>
+                <div class="info">
+                    <div class="artist">The Everly Brothers</div>
+                    <div class="title">EB 84</div>
+                    <div class="details">1984 • Mercury Records</div>
+                    <div class="bottom">
+                        <span class="price">$8.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="The Kingston Trio" data-title="The Kingston Trio (Debut Album)" data-year="1958" data-condition="VG" data-price="6.0" onclick="openModal(17)">
+                <div class="image">
+                    <img src="https://i.discogs.com/khVkC96G4yH8nNaWI_GAAOULPlPdl5ECjr7nupP2nl4/rs:fit/g:sm/q:90/h:300/w:300/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQxMjQ5/MjEtMTM1NjcxODM2/OS0zMjM5LmpwZWc.jpeg" alt="The Kingston Trio (Debut Album)">
+                </div>
+                <div class="info">
+                    <div class="artist">The Kingston Trio</div>
+                    <div class="title">The Kingston Trio (Debut Album)</div>
+                    <div class="details">1958 • Capitol Records</div>
+                    <div class="bottom">
+                        <span class="price">$6.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="The Kingston Trio" data-title="...from the "Hungry i"" data-year="1959" data-condition="VG+" data-price="6.5" onclick="openModal(15)">
+                <div class="image">
+                    <img src="https://i.discogs.com/A58B5SIEST2w2eyV1yQGPJV2GGqhP1RKPeJllukDPjk/rs:fit/g:sm/q:90/h:599/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTIxNTg1/MTctMTI2NzE2ODI2/Ny5qcGVn.jpeg" alt="...from the "Hungry i"">
+                </div>
+                <div class="info">
+                    <div class="artist">The Kingston Trio</div>
+                    <div class="title">...from the "Hungry i"</div>
+                    <div class="details">1959 • Capitol Records</div>
+                    <div class="bottom">
+                        <span class="price">$6.50</span>
+                        <span class="condition VG">VG+</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="The Kingston Trio" data-title="Here We Go Again!" data-year="1959" data-condition="VG" data-price="4.5" onclick="openModal(16)">
+                <div class="image">
+                    <img src="https://i.discogs.com/je__skG_HLE3OpAZO43h-Mj0WCy5c-FlMV0QsbfOwRU/rs:fit/g:sm/q:90/h:495/w:494/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQyNTgz/OTQtMTM1OTkzMzA3/Ny0zNjkzLmpwZWc.jpeg" alt="Here We Go Again!">
+                </div>
+                <div class="info">
+                    <div class="artist">The Kingston Trio</div>
+                    <div class="title">Here We Go Again!</div>
+                    <div class="details">1959 • Capitol Records</div>
+                    <div class="bottom">
+                        <span class="price">$4.50</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="The Kingston Trio" data-title="String Along with The Kingston Trio" data-year="1960" data-condition="VG" data-price="3.5" onclick="openModal(14)">
+                <div class="image">
+                    <img src="https://i.discogs.com/-6MZqmVCt9EyYb1Ne1IAY6C37v0-gMCEHcNySnC1bFY/rs:fit/g:sm/q:90/h:596/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE5MjA2/ODctMTQ5Nzk3NDcw/NS02NzIwLmpwZWc.jpeg" alt="String Along with The Kingston Trio">
+                </div>
+                <div class="info">
+                    <div class="artist">The Kingston Trio</div>
+                    <div class="title">String Along with The Kingston Trio</div>
+                    <div class="details">1960 • Capitol Records</div>
+                    <div class="bottom">
+                        <span class="price">$3.50</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="The Longines Symphonette" data-title="The Preview Club Yearbook of Best Songs of 1972" data-year="1972" data-condition="VG" data-price="5.0" onclick="openModal(13)">
+                <div class="image">
+                    <img src="https://i.discogs.com/nRBgYVgU126YNWJdXStOnfphWTxIs1tt7ER_MDLyY8I/rs:fit/g:sm/q:90/h:600/w:597/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTk2NTM5/NjYtMTQ4NDI2MzQz/Ny05NzkxLmpwZWc.jpeg" alt="The Preview Club Yearbook of Best Songs of 1972">
+                </div>
+                <div class="info">
+                    <div class="artist">The Longines Symphonette</div>
+                    <div class="title">The Preview Club Yearbook of Best Songs of 1972</div>
+                    <div class="details">1972 • The Longines Symphonette Society</div>
+                    <div class="bottom">
+                        <span class="price">$5.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="The Percy Faith Strings" data-title="Bouquet of Love" data-year="1962" data-condition="VG" data-price="4.0" onclick="openModal(7)">
+                <div class="image">
+                    <img src="https://i.discogs.com/XN-67vb_M_alsJ22d9-N6I3wEdJEbAeYwo2CyXyc6vM/rs:fit/g:sm/q:90/h:598/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQwMzkx/OTktMTM2NTMwNjAx/My03MTI5LmpwZWc.jpeg" alt="Bouquet of Love">
+                </div>
+                <div class="info">
+                    <div class="artist">The Percy Faith Strings</div>
+                    <div class="title">Bouquet of Love</div>
+                    <div class="details">1962 • Columbia Records</div>
+                    <div class="bottom">
+                        <span class="price">$4.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Various Artists" data-title="Music Power (22 Original Hits, 22 Original Stars)" data-year="1974" data-condition="VG" data-price="5.0" onclick="openModal(3)">
+                <div class="image">
+                    <div class="no-image">🎵</div>
+                </div>
+                <div class="info">
+                    <div class="artist">Various Artists</div>
+                    <div class="title">Music Power (22 Original Hits, 22 Original Stars)</div>
+                    <div class="details">1974 • K-Tel</div>
+                    <div class="bottom">
+                        <span class="price">$5.00</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Various Artists" data-title="Music Express (20 Original Hits, 20 Original Stars)" data-year="1975" data-condition="VG" data-price="9.5" onclick="openModal(4)">
+                <div class="image">
+                    <div class="no-image">🎵</div>
+                </div>
+                <div class="info">
+                    <div class="artist">Various Artists</div>
+                    <div class="title">Music Express (20 Original Hits, 20 Original Stars)</div>
+                    <div class="details">1975 • K-Tel</div>
+                    <div class="bottom">
+                        <span class="price">$9.50</span>
+                        <span class="condition VG">VG</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="record-card" data-artist="Various Artists / John Travolta & Olivia Newton-John" data-title="Grease (The Original Soundtrack From The Motion Picture)" data-year="1978" data-condition="VG+" data-price="12.0" onclick="openModal(41)">
+                <div class="image">
+                    <img src="https://i.discogs.com/QC5k48lk_2lLJaXVWjrCntmsEynzx9PyIkS9ytuDeeQ/rs:fit/g:sm/q:90/h:600/w:388/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE1OTYx/NzQwLTE2MDA5Njg3/NjgtODE5MS5qcGVn.jpeg" alt="Grease (The Original Soundtrack From The Motion Picture)">
+                </div>
+                <div class="info">
+                    <div class="artist">Various Artists / John Travolta & Olivia Newton-John</div>
+                    <div class="title">Grease (The Original Soundtrack From The Motion Picture)</div>
+                    <div class="details">1978 • RSO Records</div>
+                    <div class="bottom">
+                        <span class="price">$12.00</span>
+                        <span class="condition VG">VG+</span>
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div class="modal" id="recordModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+    
+    <script>
+        const records = [{"id": 19, "artist": "Barbra Streisand", "title": "My Name Is Barbra, Two...", "year": 1965, "label": "Columbia Records", "catalog_number": "CL 2405", "media_condition": "VG", "price": 3.0, "currency": "USD", "image_url": "https://i.discogs.com/Tm9n3ct5KEzSKtzU6P5ahDhQsW9sQKdXGIEO6cX5TMI/rs:fit/g:sm/q:90/h:600/w:593/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE1MTY2/MDUtMTM0ODg1MTIx/Mi01MzY3LmpwZWc.jpeg"}, {"id": 1, "artist": "Bill Monroe", "title": "The Original Bluegrass Band", "year": 1978, "label": "Rounder Records", "catalog_number": "S.S. 06", "media_condition": "VG+", "price": 8.0, "currency": "USD", "image_url": "https://i.discogs.com/vPDtHJYeXXzRqbrHAudHIY8Aun3oJfcJz3F-WTYY0q4/rs:fit/g:sm/q:90/h:600/w:594/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTM0MTk1/MzItMTQ1NTA2OTM3/Ny01MTg1LmpwZWc.jpeg"}, {"id": 22, "artist": "Bob Newhart", "title": "The Button-Down Mind of Bob Newhart", "year": 1960, "label": "Warner Bros. Records", "catalog_number": "W 1379 / WS 1379", "media_condition": "VG", "price": 5.0, "currency": "USD", "image_url": "https://i.discogs.com/liclKgOjJHHMVV04UqijR09wYMPfXpuNQMDfar-Fe-0/rs:fit/g:sm/q:90/h:589/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTEzNDMz/NDEtMTU2MDYwNTM3/NS04ODU4LmpwZWc.jpeg"}, {"id": 36, "artist": "Bobbie Gentry & Glen Campbell", "title": "Bobbie Gentry and Glen Campbell", "year": 1968, "label": "Capitol Records", "catalog_number": "ST 2928", "media_condition": "VG", "price": 5.0, "currency": "USD", "image_url": "https://i.discogs.com/ArTsa3iynitEx9qN6UJ7CMMuEuD2Um7Jy-lYZv-QVnk/rs:fit/g:sm/q:90/h:597/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTIzNDU3/MzYtMTI4MzcxMDAy/Ni5qcGVn.jpeg"}, {"id": 9, "artist": "Charlie Rich", "title": "Charlie Rich Sings Country & Western", "year": 1967, "label": "Hi Records", "catalog_number": "SHL 32037", "media_condition": "VG", "price": 8.63, "currency": "USD", "image_url": "https://i.discogs.com/qJtV0dMOT53cK10qWA-MRLeFV7HDc4SN_hIz1NYvLO0/rs:fit/g:sm/q:90/h:600/w:592/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTM5ODYz/ODEtMTU0MDEzNjE4/MC01NzgyLmpwZWc.jpeg"}, {"id": 20, "artist": "Chuck Mangione", "title": "Chase The Clouds Away", "year": 1975, "label": "A&M Records", "catalog_number": "SP-4518", "media_condition": "VG", "price": 2.5, "currency": "USD", "image_url": "https://i.discogs.com/wq3M4-wJw_SQQ9B4XHoifRvm0mX2IVJMdF0O0fEQplo/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTYzNjM2/NS0xMTk3MDUwNTQ2/LmpwZWc.jpeg"}, {"id": 40, "artist": "Conway Twitty", "title": "Conway Twitty's Greatest Hits...", "year": 1960, "label": "MGM Records", "catalog_number": "E3849", "media_condition": "VG", "price": 6.0, "currency": "USD", "image_url": "https://i.discogs.com/UroLoR9WM_rQUzxNfUf4SThqhRrZnKWKFjhzXKA88DE/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTEyNDE0/OTkxLTE1MzQ4MjU2/NjMtOTU0My5qcGVn.jpeg"}, {"id": 5, "artist": "Dion", "title": "Runaround Sue", "year": 1961, "label": "Laurie Records", "catalog_number": "LLP 2009", "media_condition": "VG+", "price": 24.99, "currency": "USD", "image_url": "https://i.discogs.com/mVZZyZtPEUxtgimXpnGOhgB2hU1UZJlrCgC6aRCFzrc/rs:fit/g:sm/q:90/h:528/w:528/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTUzOTAw/NS0xMzQ2Nzk0OTIx/LTY2NzkuanBlZw.jpeg"}, {"id": 34, "artist": "Father Guido Sarducci (Don Novello)", "title": "Live At St. Douglas Convent", "year": 1980, "label": "Warner Bros. Records", "catalog_number": "BSK 3440", "media_condition": "VG", "price": 3.0, "currency": "USD", "image_url": "https://i.discogs.com/wVd6Tc16OFwsW3yzIBWPg4doTsBPH5PQK4HBX-dW4E0/rs:fit/g:sm/q:90/h:600/w:584/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE5ODE2/MDctMTM0MDgxNjcz/Mi04MzYwLmpwZWc.jpeg"}, {"id": 35, "artist": "Glen Campbell", "title": "Galveston", "year": 1969, "label": "Capitol Records", "catalog_number": "ST-210", "media_condition": "VG", "price": 6.0, "currency": "USD", "image_url": "https://i.discogs.com/ZVqSe7WQG9GMcVavxHX2deLECl8GhFLRbF9S72s4ow8/rs:fit/g:sm/q:90/h:600/w:596/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTk3NDY4/MjItMTQ4NTcyNDk3/NC05NDExLmpwZWc.jpeg"}, {"id": 39, "artist": "Gordon Lightfoot", "title": "The Way I Feel", "year": 1967, "label": "United Artists Records", "catalog_number": "UAS 6587", "media_condition": "VG", "price": 8.0, "currency": "USD", "image_url": "https://i.discogs.com/NwQKOJiUK9snj7OnYTXs49CXPfUcTYwoiEKSkRD2Do8/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTIyNDU0/MDItMTMzMDI1MjQ0/MC5qcGVn.jpeg"}, {"id": 8, "artist": "Hank Snow", "title": "My Nova Scotia Home", "year": 1967, "label": "RCA Camden", "catalog_number": "CAL-2186", "media_condition": "VG", "price": 4.35, "currency": "USD", "image_url": "https://i.discogs.com/36mVsfcw6IEKT7DmqOtNjbfvq_ignikvA59CgayhJho/rs:fit/g:sm/q:90/h:598/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQ0MDgy/OTUtMTQ3NjM4Mjg1/Mi04MTkzLmpwZWc.jpeg"}, {"id": 18, "artist": "Jack Scott", "title": "What In The World's Come Over You", "year": 1960, "label": "Top Rank International", "catalog_number": "RM 326", "media_condition": "VG", "price": 19.41, "currency": "USD", "image_url": "https://i.discogs.com/F3W3gqWrEi72BdmlhJt1F6fyK3D7lpFsqk5MjsHmLF8/rs:fit/g:sm/q:90/h:596/w:599/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTEzNjQy/OTQtMTI2NzExNDU0/OS5qcGVn.jpeg"}, {"id": 38, "artist": "Joe Stampley", "title": "Biggest Hits", "year": 1982, "label": "Epic Records", "catalog_number": "FE 38319", "media_condition": "VG", "price": 4.0, "currency": "USD", "image_url": "https://i.discogs.com/fJXpKznFuLoL7L-w2ZUpAbNIJ4NvSjFllx1-eqboNOE/rs:fit/g:sm/q:90/h:592/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQ5OTg5/NTMtMTQ3NTEyMDgx/Mi03Njk4LmpwZWc.jpeg"}, {"id": 32, "artist": "Ken Griffin", "title": "Hawaiian Magic", "year": 1957, "label": "Columbia Records", "catalog_number": "CL 1031", "media_condition": "VG", "price": 4.5, "currency": "USD", "image_url": "https://i.discogs.com/p0szeNC00OuOEETVD2zQCWgjhTvBzv-ffwI2V_9UTwE/rs:fit/g:sm/q:90/h:594/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTc0NTAx/MDgtMTUyMDk4MTM0/MS03NzIxLmpwZWc.jpeg"}, {"id": 2, "artist": "Mac Davis", "title": "Baby Don't Get Hooked On Me", "year": 1972, "label": "Columbia Records", "catalog_number": "KC 31770", "media_condition": "VG", "price": 2.0, "currency": "USD", "image_url": "https://i.discogs.com/iYcBC7jSpiDmJzGhJEkpt82OXIGiR8si03_AtUx01J4/rs:fit/g:sm/q:90/h:600/w:596/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE3NjAz/MjAtMTQ3MjgzMDgw/OS01NDc1LmpwZWc.jpeg"}, {"id": 28, "artist": "Martin Denny", "title": "Quiet Village - The Exotic Sounds Of Martin Denny", "year": 1959, "label": "Liberty Records", "catalog_number": "LRP 3122 / LST 7122", "media_condition": "VG+", "price": 14.0, "currency": "USD", "image_url": "https://i.discogs.com/aTa2FLZcPZMuptCCaT6-ocyuNSXlkqyn0sjPLCp6iPY/rs:fit/g:sm/q:90/h:592/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTM5OTQy/NS0xMjkwMzc2MzQx/LmpwZWc.jpeg"}, {"id": 26, "artist": "Marty Robbins", "title": "Marty's Greatest Hits", "year": 1959, "label": "Columbia Records", "catalog_number": "CL 1325", "media_condition": "VG", "price": 6.0, "currency": "USD", "image_url": "https://i.discogs.com/Fs43w_P-YbLsJSXXyq2kxkKpvs6Q07TfQOgzV5lnKfQ/rs:fit/g:sm/q:90/h:600/w:593/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI4MzM5/ODktMTMwOTAwODAx/NC5qcGVn.jpeg"}, {"id": 25, "artist": "Mitch Miller and The Gang", "title": "Sing Along With Mitch", "year": 1958, "label": "Columbia Records", "catalog_number": "CL 1160", "media_condition": "VG", "price": 4.5, "currency": "USD", "image_url": "https://i.discogs.com/23J7wza1WEe05k3bsX77hS3IxJ69jOhbwkRYR4q5gxQ/rs:fit/g:sm/q:90/h:600/w:588/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTIwMzg2/MTItMTI2MDEyNzM0/NS5qcGVn.jpeg"}, {"id": 23, "artist": "Nana Mouskouri", "title": "Nana Mouskouri Sings Over & Over", "year": 1969, "label": "Fontana Records", "catalog_number": "SRF 67594", "media_condition": "VG", "price": 6.0, "currency": "USD", "image_url": "https://i.discogs.com/KPqgVWjbXtXvwN0C13LIrT_iq4ERAK74q3LeweJHHpg/rs:fit/g:sm/q:90/h:475/w:513/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQ1NDg1/NDAtMTM2ODAzOTcw/MS0xNzUwLmpwZWc.jpeg"}, {"id": 24, "artist": "Nana Mouskouri", "title": "A Paris (Enregistrement Public A L'Olympia)", "year": 1979, "label": "Cachet Records", "catalog_number": "CL3-9000", "media_condition": "VG", "price": 15.0, "currency": "USD", "image_url": "https://i.discogs.com/rF9mapFRx_LPsik9MIj94xj2F6qIr96c837JER9azMw/rs:fit/g:sm/q:90/h:600/w:578/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTUxMDAz/MzAtMTUwOTU5NzAz/MC05MTk5LmpwZWc.jpeg"}, {"id": 27, "artist": "Nana Mouskouri", "title": "Roses & Sunshine", "year": 1979, "label": "Cachet Records", "catalog_number": "CL 3-3000", "media_condition": "VG", "price": 5.0, "currency": "USD", "image_url": "https://i.discogs.com/eF4HhpnsGUmvGCjQQaaw6bMrDO5TSdi4GbLkaxrhBDA/rs:fit/g:sm/q:90/h:600/w:598/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQwODU5/NzItMTUwOTY1Mzc2/NC00MjY0LmpwZWc.jpeg"}, {"id": 30, "artist": "Pat Boone", "title": "This And That", "year": 1960, "label": "Dot Records", "catalog_number": "DLP 25285", "media_condition": "VG", "price": 5.0, "currency": "USD", "image_url": "https://i.discogs.com/AM0e1To5DIwCYUYYiyes-b4cFLOq3xREnZYYcw4JSVc/rs:fit/g:sm/q:90/h:600/w:597/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQyMDgz/ODMtMTYwNTE5MzU5/My01NDEwLmpwZWc.jpeg"}, {"id": 29, "artist": "Paul Anka", "title": "Paul Anka Sings His Big Big Big 15 Vol. 3", "year": 1962, "label": "Sparton / ABC-Paramount", "catalog_number": "ABC-409", "media_condition": "VG", "price": 10.0, "currency": "USD", "image_url": "https://i.discogs.com/bfAt21aIpDb_2iDjzUYh0rnusH-XILhn30ym0VeNJZ8/rs:fit/g:sm/q:90/h:300/w:296/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTMyMzM3/MjItMTMyMTYyODM2/NS5qcGVn.jpeg"}, {"id": 11, "artist": "Pierre Moreau And His Orchestra", "title": "Love Is Blue (L'Amour Est Bleu)", "year": 1968, "label": "Custom Records", "catalog_number": "CS 1106", "media_condition": "VG", "price": 4.0, "currency": "USD", "image_url": "https://i.discogs.com/jkJdweOU5uqkDnSCqtuapcuEL_kKKJIQeyQS7gtPpKc/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTg1OTU3/MzYtMTQ2NDc2NjQ2/NS04MzU0LmpwZWc.jpeg"}, {"id": 37, "artist": "Ricky Van Shelton", "title": "Loving Proof", "year": 1988, "label": "Columbia Records", "catalog_number": "FC 44221", "media_condition": "VG+", "price": 10.0, "currency": "USD", "image_url": "https://i.discogs.com/lyAzY6BTW9o0ZCZE7qIdKfnP5nL4BGCmgx7lnP4zddE/rs:fit/g:sm/q:90/h:592/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTMyNDE5/NDctMTM2NjU5MDU4/MC0zNDQ2LmpwZWc.jpeg"}, {"id": 6, "artist": "Ronnie Hawkins", "title": "Ronnie Hawkins", "year": 1959, "label": "Roulette Records", "catalog_number": "R-25078", "media_condition": "VG", "price": 30.0, "currency": "USD", "image_url": "https://i.discogs.com/Zd_hBLuYNO6BGpl3rsqj5ZLuhoVD9cutPSJGKqorBb4/rs:fit/g:sm/q:90/h:493/w:500/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTM3MjI5/MTMtMTM0MTc3NzI3/NS0yMzA4LmpwZWc.jpeg"}, {"id": 10, "artist": "Sammy Davis Jr.", "title": "Forget-Me-Nots For First Nighters", "year": 1963, "label": "Decca Records", "catalog_number": "DL 4381", "media_condition": "VG", "price": 8.0, "currency": "USD", "image_url": "https://i.discogs.com/l_wCWoPnHz_isQPPyNIKsFmGNjk07aTc9UAMCKKWR1c/rs:fit/g:sm/q:90/h:225/w:224/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTU4NDc2/MTUtMTQwNDM1NDg4/Ny04Mzc0LmpwZWc.jpeg"}, {"id": 33, "artist": "Shelley Berman", "title": "Inside Shelley Berman", "year": 1959, "label": "Verve Records", "catalog_number": "MG V-15003", "media_condition": "VG", "price": 5.0, "currency": "USD", "image_url": "https://i.discogs.com/EAvdBMa5HtJeydxWDVDuw8FCyowUxCD74tC6gX7rr4k/rs:fit/g:sm/q:90/h:599/w:592/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTUwMTEx/NTgtMTM4NTY0MDcx/MC05NDcyLmpwZWc.jpeg"}, {"id": 12, "artist": "The Bells", "title": "Stay Awhile", "year": 1971, "label": "Polydor Records", "catalog_number": "2424 022", "media_condition": "VG", "price": 5.0, "currency": "USD", "image_url": "https://i.discogs.com/sq2dCJ7a_3eMCgPLbNQqFekc97Cbsz3lm6zmYOOIfKk/rs:fit/g:sm/q:90/h:600/w:592/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE1Mzg2/ODUtMTM3MzgxMDYy/My0yMjE3LmpwZWc.jpeg"}, {"id": 21, "artist": "The Everly Brothers", "title": "The Everly Brothers' Best", "year": 1959, "label": "Cadence Records", "catalog_number": "CLP 3025", "media_condition": "VG+", "price": 15.0, "currency": "USD", "image_url": "https://i.discogs.com/5Z3AFC7co1ZAMh1TV0oEtvbHtvwznp4OlGU4EuLXv4s/rs:fit/g:sm/q:90/h:499/w:500/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE3NDk1/NDItMTI5OTU0ODM2/OC5qcGVn.jpeg"}, {"id": 31, "artist": "The Everly Brothers", "title": "EB 84", "year": 1984, "label": "Mercury Records", "catalog_number": "822 431-1", "media_condition": "VG", "price": 8.0, "currency": "USD", "image_url": "https://i.discogs.com/ewJbFEa0b2gLnSeYAdr__0oX3WDt-XysgXaVjbm1Z3Y/rs:fit/g:sm/q:90/h:492/w:500/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTExMjQ1/NTItMTIyNDYwMDgw/OC5qcGVn.jpeg"}, {"id": 17, "artist": "The Kingston Trio", "title": "The Kingston Trio (Debut Album)", "year": 1958, "label": "Capitol Records", "catalog_number": "T-996 / ST-996", "media_condition": "VG", "price": 6.0, "currency": "USD", "image_url": "https://i.discogs.com/khVkC96G4yH8nNaWI_GAAOULPlPdl5ECjr7nupP2nl4/rs:fit/g:sm/q:90/h:300/w:300/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQxMjQ5/MjEtMTM1NjcxODM2/OS0zMjM5LmpwZWc.jpeg"}, {"id": 15, "artist": "The Kingston Trio", "title": "...from the \"Hungry i\"", "year": 1959, "label": "Capitol Records", "catalog_number": "T-1107 / ST-1107", "media_condition": "VG+", "price": 6.5, "currency": "USD", "image_url": "https://i.discogs.com/A58B5SIEST2w2eyV1yQGPJV2GGqhP1RKPeJllukDPjk/rs:fit/g:sm/q:90/h:599/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTIxNTg1/MTctMTI2NzE2ODI2/Ny5qcGVn.jpeg"}, {"id": 16, "artist": "The Kingston Trio", "title": "Here We Go Again!", "year": 1959, "label": "Capitol Records", "catalog_number": "T-1258 / ST-1258", "media_condition": "VG", "price": 4.5, "currency": "USD", "image_url": "https://i.discogs.com/je__skG_HLE3OpAZO43h-Mj0WCy5c-FlMV0QsbfOwRU/rs:fit/g:sm/q:90/h:495/w:494/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQyNTgz/OTQtMTM1OTkzMzA3/Ny0zNjkzLmpwZWc.jpeg"}, {"id": 14, "artist": "The Kingston Trio", "title": "String Along with The Kingston Trio", "year": 1960, "label": "Capitol Records", "catalog_number": "T-1407 / ST-1407", "media_condition": "VG", "price": 3.5, "currency": "USD", "image_url": "https://i.discogs.com/-6MZqmVCt9EyYb1Ne1IAY6C37v0-gMCEHcNySnC1bFY/rs:fit/g:sm/q:90/h:596/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE5MjA2/ODctMTQ5Nzk3NDcw/NS02NzIwLmpwZWc.jpeg"}, {"id": 13, "artist": "The Longines Symphonette", "title": "The Preview Club Yearbook of Best Songs of 1972", "year": 1972, "label": "The Longines Symphonette Society", "catalog_number": "SYS 5523-5524", "media_condition": "VG", "price": 5.0, "currency": "USD", "image_url": "https://i.discogs.com/nRBgYVgU126YNWJdXStOnfphWTxIs1tt7ER_MDLyY8I/rs:fit/g:sm/q:90/h:600/w:597/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTk2NTM5/NjYtMTQ4NDI2MzQz/Ny05NzkxLmpwZWc.jpeg"}, {"id": 7, "artist": "The Percy Faith Strings", "title": "Bouquet of Love", "year": 1962, "label": "Columbia Records", "catalog_number": "CS 8481", "media_condition": "VG", "price": 4.0, "currency": "USD", "image_url": "https://i.discogs.com/XN-67vb_M_alsJ22d9-N6I3wEdJEbAeYwo2CyXyc6vM/rs:fit/g:sm/q:90/h:598/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQwMzkx/OTktMTM2NTMwNjAx/My03MTI5LmpwZWc.jpeg"}, {"id": 3, "artist": "Various Artists", "title": "Music Power (22 Original Hits, 22 Original Stars)", "year": 1974, "label": "K-Tel", "catalog_number": "TC214", "media_condition": "VG", "price": 5.0, "currency": "USD", "image_url": null}, {"id": 4, "artist": "Various Artists", "title": "Music Express (20 Original Hits, 20 Original Stars)", "year": 1975, "label": "K-Tel", "catalog_number": "TC 228", "media_condition": "VG", "price": 9.5, "currency": "USD", "image_url": null}, {"id": 41, "artist": "Various Artists / John Travolta & Olivia Newton-John", "title": "Grease (The Original Soundtrack From The Motion Picture)", "year": 1978, "label": "RSO Records", "catalog_number": "3517 015", "media_condition": "VG+", "price": 12.0, "currency": "USD", "image_url": "https://i.discogs.com/QC5k48lk_2lLJaXVWjrCntmsEynzx9PyIkS9ytuDeeQ/rs:fit/g:sm/q:90/h:600/w:388/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE1OTYx/NzQwLTE2MDA5Njg3/NjgtODE5MS5qcGVn.jpeg"}];
+    
+    function filterRecords() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const condition = document.getElementById('conditionFilter').value;
+        const sort = document.getElementById('sortSelect').value;
+        const cards = document.querySelectorAll('.record-card');
+        const grid = document.getElementById('recordGrid');
+        let visible = [];
+        
+        cards.forEach(card => {
+            const artist = card.dataset.artist.toLowerCase();
+            const title = card.dataset.title.toLowerCase();
+            const year = card.dataset.year;
+            const cond = card.dataset.condition;
+            
+            let show = true;
+            if (search && !artist.includes(search) && !title.includes(search)) show = false;
+            if (condition !== 'all' && cond !== condition) show = false;
+            
+            card.style.display = show ? '' : 'none';
+            if (show) visible.push(card);
+        });
+        
+        // Sort
+        visible.sort((a, b) => {
+            let valA, valB;
+            switch(sort) {
+                case 'artist':
+                    valA = a.dataset.artist;
+                    valB = b.dataset.artist;
+                    break;
+                case 'year':
+                    valA = parseInt(a.dataset.year) || 0;
+                    valB = parseInt(b.dataset.year) || 0;
+                    break;
+                case 'price':
+                    valA = parseFloat(a.dataset.price) || 0;
+                    valB = parseFloat(b.dataset.price) || 0;
+                    break;
+                case 'condition':
+                    const order = {'M':1,'NM':2,'VG+':3,'VG':4,'G':5};
+                    valA = order[a.dataset.condition] || 99;
+                    valB = order[b.dataset.condition] || 99;
+                    break;
+                default: return 0;
+            }
+            if (valA < valB) return -1;
+            if (valA > valB) return 1;
+            return 0;
+        });
+        
+        visible.forEach((card, i) => {
+            card.style.order = i;
+        });
+        
+        // Show no results message
+        const noResults = document.querySelector('.no-results');
+        if (visible.length === 0) {
+            if (!noResults) {
+                const msg = document.createElement('div');
+                msg.className = 'no-results';
+                msg.textContent = 'No records found matching your search.';
+                grid.appendChild(msg);
+            }
+        } else {
+            const existing = document.querySelector('.no-results');
+            if (existing) existing.remove();
+        }
+    }
+    
+    function openModal(id) {
+        const record = records.find(r => r.id === id);
+        if (!record) return;
+        
+        const modal = document.getElementById('recordModal');
+        const body = document.getElementById('modalBody');
+        
+        const imageHtml = record.image_url 
+            ? `<img class="modal-image" src="${record.image_url}" alt="${record.title}">`
+            : `<div class="modal-image" style="background:#f0ebe6;display:flex;align-items:center;justify-content:center;font-size:4rem;color:#ccc;">🎵</div>`;
+        
+        body.innerHTML = `
+            ${imageHtml}
+            <div class="modal-artist">${record.artist}</div>
+            <div class="modal-title">${record.title}</div>
+            <div class="modal-details">
+                ${record.year ? `📅 ${record.year}` : ''}
+                ${record.label ? ` • 🏷️ ${record.label}` : ''}
+                ${record.catalog_number ? ` • 📀 ${record.catalog_number}` : ''}
+                <br>Condition: <strong>${record.media_condition}</strong>
+            </div>
+            <div class="modal-price">${record.currency} ${record.price.toFixed(2)}</div>
+            <div class="pickup-info">
+                📍 <strong>Local Pickup Only</strong><br>
+                Payment handled in person. Shipping available at buyer's expense.
+            </div>
+            <button onclick="closeModal()" style="margin-top:15px;padding:10px 30px;background:#0f3460;color:white;border:none;border-radius:8px;cursor:pointer;font-size:1rem;">
+                Close
+            </button>
+        `;
+        
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeModal() {
+        document.getElementById('recordModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    
+    // Close modal on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+    
+    // Close modal on click outside
+    document.getElementById('recordModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeModal();
+    });
+    
+    // Initial filter
+    filterRecords();
+    </script>
+</body>
+</html>
